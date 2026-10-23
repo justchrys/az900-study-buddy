@@ -43,19 +43,13 @@ button.ghost{background:none;border:1px solid var(--line);color:var(--fg);border
 <body>
 <main>
 <h1>AZ-900 Study Buddy</h1>
-<p class="sub">Unofficial study aid. Not affiliated with or endorsed by Microsoft. All content is AI-generated; verify on Microsoft Learn.</p>
+<p class="sub">Unofficial study aid. Not affiliated with or endorsed by Microsoft. Original practice content; always verify on Microsoft Learn.</p>
 <nav id="nav"><button data-t="buddy" class="on">Study Buddy</button><button data-t="quiz">Quiz</button><button data-t="progress">Readiness</button></nav>
 
 <section id="buddy">
   <div class="card">
-    <div class="row">
-      <div><label for="lang">Explain in</label>
-        <select id="lang"><option>English</option><option>Swahili</option><option>Simple English with Sheng</option><option>French</option><option>Hausa</option><option>Yoruba</option><option>Zulu</option></select></div>
-      <div><label for="ctx">African example from</label>
-        <select id="ctx"><option>Any African context</option><option>Kenya (M-Pesa, matatus)</option><option>Nigeria (fintech, Lagos markets)</option><option>Ghana (mobile money, cocoa)</option><option>South Africa (load-shedding, retail)</option><option>Rwanda / Ethiopia (agri-tech)</option></select></div>
-    </div>
-    <label for="q">Ask about any AZ-900 concept</label>
-    <textarea id="q" rows="2" placeholder="e.g. What is the difference between scalability and elasticity?"></textarea>
+    <label for="q">Look up an AZ-900 concept</label>
+    <textarea id="q" rows="2" placeholder="e.g. elasticity, availability zone, Azure Policy"></textarea>
     <div class="chips" id="chips"></div>
     <button class="pri" id="ask">Explain it</button>
   </div>
@@ -66,7 +60,6 @@ button.ghost{background:none;border:1px solid var(--line);color:var(--fg);border
   <div class="card">
     <div class="row">
       <div><label for="dom">Topic</label><select id="dom"></select></div>
-      <div><label for="lvl">Difficulty</label><select id="lvl"><option>Beginner</option><option selected>Exam level</option><option>Tricky</option></select></div>
     </div>
     <div class="row"><button class="pri" id="gen">New question</button><button class="ghost" id="weak">Target my weakest area</button></div>
     <p class="muted" id="qstat"></p>
@@ -96,10 +89,20 @@ const $=s=>document.querySelector(s);
 const KEY="az900-unofficial-stats-v1";
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
 function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
-let stats=load(), sample=null, recent=[];
+let stats=load(), recent=[];
 
-// ---- offline fallback (used when live AI is unavailable, e.g. on GitHub Pages)
+// ---- built-in content (no AI or backend needed)
 const BUD=[
+{k:/lock/i,t:"A resource lock stops accidental deletion or changes. A delete lock lets people read and edit a resource but not delete it; a read-only lock blocks edits too. Locks apply even to owners until someone removes them.\n\nExample: a padlock on the shop safe. Even the manager has to take the lock off first.\n\nExam tip: locks protect against accidents, while Azure Policy enforces rules about how resources are set up."},
+{k:/region|pair/i,t:"An Azure region is a geographic area with one or more datacenters. Most regions are paired with another region in the same geography. In a wide outage Azure prioritises recovering one region of each pair, and geo-redundant storage copies data to the paired region.\n\nExample: two branches of a bank in different cities, so a problem in one city doesn’t stop the whole bank.\n\nExam tip: availability zones protect inside a region, region pairs protect across regions."},
+{k:/cost|pricing|tco|budget|\btags?\b/i,t:"The pricing calculator estimates what planned Azure services will cost. The TCO calculator compares running on-premises with running in Azure. Microsoft Cost Management tracks your actual spending, and budgets can alert you. Tags label resources so you can group costs, for example by department.\n\nExample: estimating a wedding budget before booking, then tracking receipts afterwards.\n\nExam tip: pricing = future Azure cost, TCO = on-premises versus Azure, Cost Management = what you are spending now."},
+{k:/entra|identity|\bsso\b|\bmfa\b|multifactor|active directory/i,t:"Microsoft Entra ID is Azure’s cloud identity service. It handles sign-in, single sign-on (one sign-in for many apps) and multifactor authentication (extra proof such as a code on your phone). Conditional Access decides when to allow, block or challenge a sign-in.\n\nExample: one ID card that opens the office gate, the library and the lab, with a second check for the server room.\n\nExam tip: authentication is who you are, authorisation is what you are allowed to do."},
+{k:/zero trust|defen[cs]e/i,t:"Zero Trust means never trusting a request by default: verify explicitly, use least-privilege access and assume a breach. Defence in depth means several layers of protection, so if one fails the next still stands.\n\nExample: a compound with a gate, a guard, a locked door and a locked cupboard.\n\nExam tip: Zero Trust is the mindset, defence in depth is the layered design."},
+{k:/vnet|virtual network|vpn|expressroute/i,t:"An Azure virtual network is your own private network in the cloud. A VPN Gateway connects it to your office over the internet using encryption. ExpressRoute gives a private dedicated connection that does not use the public internet.\n\nExample: sending goods in a locked truck on the public road (VPN) versus building your own private road (ExpressRoute).\n\nExam tip: a private connection that avoids the internet means ExpressRoute."},
+{k:/storage|blob|redundan|\b[lgz]rs\b/i,t:"A storage account holds blobs (files and media), file shares, queues and tables. Redundancy options copy your data: LRS keeps copies in one datacenter, ZRS spreads them across availability zones, and GRS also copies to a second region. Access tiers such as hot, cool, cold and archive trade cost against how often you read the data.\n\nExample: keeping photos in a drawer at home, a cupboard, or a store in another town.\n\nExam tip: more distance between copies means more protection and usually more cost."},
+{k:/\barm\b|bicep|template|\biac\b|infrastructure as code/i,t:"Azure Resource Manager (ARM) is the layer that deploys and manages Azure resources. ARM templates and Bicep describe the resources you want in a file, so deployments are repeatable. Bicep is a simpler language that is turned into an ARM template.\n\nExample: following a written recipe instead of cooking from memory each time.\n\nExam tip: declare it in a file and deploy it the same way every time: infrastructure as code."},
+{k:/monitor|advisor|service health/i,t:"Azure Monitor collects and analyses data about your resources. Azure Advisor gives personalised recommendations on cost, security, reliability and performance. Azure Service Health tells you about Azure issues and planned maintenance that affect you.\n\nExample: a dashboard of your shop’s sales (Monitor), a consultant’s tips (Advisor), and a notice from the landlord about repairs (Service Health).\n\nExam tip: Monitor = what is happening, Advisor = what to improve, Service Health = Azure’s own problems."},
+{k:/compute|\bvms?\b|virtual machine|container|app service|function|serverless|scale set/i,t:"Virtual machines give you full control of a server (IaaS). Containers package an app so it runs the same anywhere and are lighter than VMs. Azure App Service hosts web apps without server management (PaaS). Azure Functions runs code only when triggered and bills per execution (serverless).\n\nExample: renting a whole shop (VM), a stall in a market (container), a furnished shop (App Service), or hiring a rider only when an order arrives (Functions).\n\nExam tip: the less you manage, the more managed the service."},
 {k:/elastic|scalab/i,t:"Scalability is growing capacity to meet long-term growth. Elasticity is automatically adding and removing resources as demand rises and falls.\n\nExample: buying a second boda boda because your regular customers doubled over the year is scalability. Calling in three extra riders for one chaotic Friday at 5pm, then sending them home, is elasticity.\n\nExam tip: if the question mentions automatically shrinking back after a spike, the answer is elasticity."},
 {k:/zone|availab/i,t:"An availability zone is one or more separate datacenters inside an Azure region, each with its own power, cooling and networking.\n\nExample: think of three markets in one city on different power lines. If one has a blackout, the others keep trading.\n\nExam tip: zones protect against a datacenter failure inside a region. Region pairs are about disasters that hit a whole region."},
 {k:/shared|responsib/i,t:"In the shared responsibility model, Microsoft secures the physical datacenter and you stay responsible for your data, accounts and devices. Everything in between shifts depending on IaaS, PaaS or SaaS.\n\nExample: a landlord looks after the building, but you still lock your own door and decide who gets a key.\n\nExam tip: your data and identities are your responsibility in every model."},
@@ -108,6 +111,15 @@ const BUD=[
 {k:/capex|opex|expend/i,t:"CapEx is paying a large amount upfront for assets. OpEx is paying as you go for what you use. Cloud is mostly OpEx with consumption-based pricing.\n\nExample: buying your own motorbike is CapEx. Paying a boda boda per trip is OpEx.\n\nExam tip: pay-as-you-go and no upfront hardware means OpEx."}
 ];
 const BANK=[
+{d:"cloud",i:4,question:"A bank keeps customer records in its own datacenter but runs its public website in Azure, with the two connected. Which model is this?",options:["Public cloud","Private cloud","Hybrid cloud","Multicloud"],answer:2,why:"Hybrid cloud combines on-premises or private infrastructure with a public cloud.",whyNot:["Public cloud alone would put everything in Azure.","A private cloud alone would keep everything in the bank’s own environment.","Correct.","Multicloud means using more than one public cloud provider."],tip:"Own datacenter plus public cloud: hybrid."},
+{d:"arch",i:0,question:"Which statement best describes an Azure region pair?",options:["Two regions in the same geography that help provide resilience against a regional disaster","Two availability zones inside the same datacenter","Two subscriptions linked for billing","Two virtual networks connected by peering"],answer:0,why:"Region pairs link two regions in the same geography so recovery and data copies can be handled across regions.",whyNot:["Correct.","Availability zones sit inside one region and are not a region pair.","Billing links between subscriptions have nothing to do with regions.","Peering connects virtual networks and is unrelated to region pairs."],tip:"Zones inside a region, pairs across regions."},
+{d:"arch",i:2,question:"Which feature automatically adds or removes VM instances as demand changes?",options:["Virtual Machine Scale Sets","Availability sets","Resource groups","Azure Bastion"],answer:0,why:"Scale sets manage a group of identical VMs and can change the number of instances automatically.",whyNot:["Correct.","Availability sets spread VMs across hardware to reduce downtime and do not change the instance count.","Resource groups only organise resources.","Bastion provides secure remote access and does not scale VMs."],tip:"Auto-adding VMs: scale sets."},
+{d:"arch",i:4,question:"Which service provides a private connection between an on-premises network and Azure that does not travel over the public internet?",options:["ExpressRoute","VPN Gateway","Azure Bastion","Azure Firewall"],answer:0,why:"ExpressRoute uses a private connection through a connectivity provider instead of the public internet.",whyNot:["Correct.","A VPN Gateway encrypts traffic but sends it over the public internet.","Bastion gives secure remote access to VMs.","Azure Firewall filters network traffic and does not connect networks."],tip:"Private line, not the internet: ExpressRoute."},
+{d:"arch",i:7,question:"Which security principle says to verify every request explicitly, as though it came from an open network?",options:["Zero Trust","Perimeter security","Shared responsibility","Security by obscurity"],answer:0,why:"Zero Trust assumes no request is trusted by default and verifies each one.",whyNot:["Correct.","Perimeter security trusts anything already inside the network boundary.","Shared responsibility describes who secures what in the cloud.","Hiding details is not a verification model."],tip:"Never trust, always verify."},
+{d:"mgmt",i:3,question:"Which service helps you govern and understand data across on-premises, multicloud and SaaS sources?",options:["Microsoft Purview","Azure Monitor","Azure Bastion","Azure DevOps"],answer:0,why:"Microsoft Purview provides data governance, risk and compliance across your data estate.",whyNot:["Correct.","Monitor collects telemetry about resources and apps.","Bastion provides secure remote access to VMs.","Azure DevOps supports software development workflows."],tip:"Data governance and compliance: Purview."},
+{d:"mgmt",i:4,question:"Which tool lets you run Azure CLI or PowerShell commands from a browser without installing anything locally?",options:["Azure Cloud Shell","Azure Advisor","Azure Arc","Azure Policy"],answer:0,why:"Cloud Shell is a browser-based command line with Azure CLI and PowerShell ready to use.",whyNot:["Correct.","Advisor gives recommendations and has no command line.","Arc extends Azure management to resources outside Azure.","Policy enforces rules on resources."],tip:"Command line in the browser: Cloud Shell."},
+{d:"mgmt",i:5,question:"Which approach lets you describe Azure resources in a file so deployments are repeatable and consistent?",options:["Infrastructure as code with ARM templates or Bicep","Clicking through the portal each time","Azure Advisor recommendations","Resource locks"],answer:0,why:"ARM templates and Bicep declare resources in code, so the same deployment can be repeated.",whyNot:["Correct.","Manual clicking is slow and hard to repeat exactly.","Advisor gives advice and does not deploy resources.","Locks prevent changes and do not define resources."],tip:"Same file, same result."},
+{d:"mgmt",i:6,question:"Which service lets you manage servers running on-premises or in other clouds from Azure?",options:["Azure Arc","Azure Advisor","Azure Service Health","Azure Cloud Shell"],answer:0,why:"Azure Arc extends Azure management and governance to resources outside Azure.",whyNot:["Correct.","Advisor recommends improvements for Azure resources.","Service Health reports on Azure service issues.","Cloud Shell is a browser command line, not a management extension."],tip:"Arc reaches outside Azure."},
 {d:"cloud",i:0,question:"A retailer’s site gets ten times its normal traffic for one day and then returns to normal. Which capability lets resources grow for the spike and shrink afterward automatically?",options:["Elasticity","High availability","Disaster recovery","Fault tolerance"],answer:0,why:"Elasticity is automatically adding and removing resources to match demand, including shrinking when the spike ends.",whyNot:["Correct.","High availability is about keeping a service running with minimal downtime, not matching demand.","Disaster recovery is about recovering after a major failure.","Fault tolerance is about continuing to work when a component fails."],tip:"Spike up, then back down by itself: elasticity."},
 {d:"cloud",i:1,question:"When a company uses a SaaS product such as an online email service, which item always remains the customer’s responsibility?",options:["Physical datacenter security","Operating system patching","The information and data, and who has access to it","Network cabling"],answer:2,why:"In every cloud service model the customer remains responsible for their data, accounts and access.",whyNot:["The provider secures the physical datacenter in every model.","In SaaS the provider manages the operating system.","Correct.","Cabling is part of the provider’s physical infrastructure."],tip:"Data and identities are always yours."},
 {d:"cloud",i:2,question:"A startup avoids buying servers and pays only for the compute hours it uses each month. Which describes this approach?",options:["Capital expenditure (CapEx)","Operational expenditure (OpEx) with consumption-based pricing","A perpetual software licence","A private cloud"],answer:1,why:"Paying for what you use as you go is operational expenditure, which is how consumption-based cloud pricing works.",whyNot:["CapEx means a large upfront purchase of assets such as servers.","Correct.","A perpetual licence is a one-time purchase, the opposite of pay-as-you-go.","A private cloud is a deployment model and says nothing about how you pay."],tip:"Pay as you go means OpEx."},
@@ -126,7 +138,7 @@ function offlineAsk(q){
   const me=document.createElement("p");me.className="msg me";me.textContent="You: "+q;
   const out=document.createElement("p");out.className="msg";
   const hit=BUD.find(b=>b.k.test(q));
-  out.textContent=hit?hit.t+"\n\n(Built-in answer. Language and country choices need live AI.)":"Live AI isn’t available here, so I can only answer the built-in topics: scalability vs elasticity, availability zones, shared responsibility, IaaS/PaaS/SaaS, Azure Policy, and CapEx vs OpEx.";
+  out.textContent=hit?hit.t:"I don’t have a built-in explanation for that yet. Try one of the topic buttons above, or look it up on Microsoft Learn.";
   $("#chat").prepend(out);$("#chat").prepend(me);
 }
 function offlineQ(forceSub){
@@ -139,7 +151,9 @@ function offlineQ(forceSub){
   recent.push(r.question.slice(0,80));
   const box=$("#qbox");box.innerHTML="";
   const card=document.createElement("div");card.className="card";box.appendChild(card);
-  show(card,r,r.d,D[r.d].subs[r.i]);
+  const o=[0,1,2,3].sort(()=>Math.random()-.5);
+  const q={...r,options:o.map(i=>r.options[i]),whyNot:o.map(i=>r.whyNot[i]),answer:o.indexOf(r.answer)};
+  show(card,q,r.d,D[r.d].subs[r.i]);
 }
 
 // ---- tabs
@@ -149,45 +163,16 @@ document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{
   if(b.dataset.t==="progress")renderProgress();
 });
 
-(async()=>{try{sample=await claude.use("sample")}catch(e){sample=null}
-  if(!sample){const n=document.createElement("p");n.className="muted err";n.textContent="Live AI isn’t available here, so the app is using its built-in practice questions and answers. Open the claude.ai version for unlimited AI-generated content.";document.querySelector("main").insertBefore(n,$("#nav"))}
-})();
 
-// ---- Study Buddy
-const BUDDY=`You are "Study Buddy", a friendly tutor helping a beginner prepare for Microsoft Azure Fundamentals (AZ-900), based on the public AZ-900 skills outline.
-Rules:
-- Explain the concept in plain words first (2-4 sentences), then give ONE real-life analogy or example set in the learner's chosen African context, then a one-line "Exam tip" on how this is usually tested or confused with a similar concept.
-- Be accurate about Azure. If you are unsure of a detail, say so and point to Microsoft Learn rather than guessing.
-- Keep the answer under 180 words. No headings, no markdown symbols.
-- Write in the requested language. Keep Azure service names in English.
-- Never reproduce real exam questions.`;
-const chips=["Scalability vs elasticity","What is an availability zone?","Shared responsibility model","IaaS vs PaaS vs SaaS","What does Azure Policy do?","CapEx vs OpEx"];
-chips.forEach(t=>{const c=document.createElement("button");c.className="chip";c.textContent=t;c.onclick=()=>{$("#q").value=t;ask()};$("#chips").appendChild(c)});
+// ---- Study Buddy (built-in glossary)
+const CHIPS=["Scalability vs elasticity","Availability zones","Regions and region pairs","Shared responsibility","IaaS, PaaS, SaaS","CapEx vs OpEx","Compute options","Virtual networks","Storage and redundancy","Microsoft Entra ID","Zero Trust","Azure Policy","Resource locks","Cost management","ARM and Bicep","Monitor and Advisor"];
+CHIPS.forEach(t=>{const c=document.createElement("button");c.className="chip";c.textContent=t;c.onclick=()=>{$("#q").value=t;ask()};$("#chips").appendChild(c)});
 $("#ask").onclick=ask;
-async function ask(){
-  const q=$("#q").value.trim(); if(!q)return;
-  if(!sample){offlineAsk(q);return}
-  const btn=$("#ask");btn.disabled=true;
-  const me=document.createElement("p");me.className="msg me";me.textContent="You: "+q;
-  const out=document.createElement("p");out.className="msg";out.textContent="Thinking…";
-  $("#chat").prepend(out);$("#chat").prepend(me);
-  const prompt=`${BUDDY}\n\nLanguage: ${$("#lang").value}\nContext for the example: ${$("#ctx").value}\n\nLearner question: ${q}`;
-  try{await sample(prompt,{cache:false,onText:({text})=>{out.textContent=text}})}
-  catch(e){out.textContent="Sorry, that didn’t work ("+(e&&e.code||"error")+"). Please try again.";out.classList.add("err")}
-  btn.disabled=false;
-}
+$("#q").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask()}});
+function ask(){const q=$("#q").value.trim();if(q)offlineAsk(q)}
 
 // ---- Quiz
 Object.entries(D).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;$("#dom").appendChild(o)});
-const QUIZ=`You write ORIGINAL practice questions for Microsoft Azure Fundamentals (AZ-900), based only on the public AZ-900 skills outline. Never copy or closely imitate real exam questions.
-Return ONLY a JSON object, no markdown, with these keys:
-"question": string (a short scenario or direct question),
-"options": array of exactly 4 strings (plausible distractors, similar length, no "all of the above"),
-"answer": integer 0-3 index of the single correct option,
-"why": string explaining in 1-3 sentences why the correct option is right,
-"whyNot": array of 4 strings, one per option in order; for the correct option write "Correct."; for the others explain the specific misconception that makes it wrong,
-"tip": string, one-line memory aid.
-Be technically accurate. If a fact is uncertain, choose a different question.`;
 function pickSub(dom,weak){
   const subs=D[dom].subs;
   if(weak){const t=subs.filter(s=>stats[s]).sort((a,b)=>acc(a)-acc(b));if(t.length&&acc(t[0])<.8)return t[0]}
@@ -200,21 +185,7 @@ $("#weak").onclick=()=>{
   Object.entries(D).forEach(([k,v])=>v.subs.forEach(s=>{if(stats[s]&&acc(s)<bs){bs=acc(s);best=[k,s]}}));
   if(best){$("#dom").value=best[0];newQ(true,best[1])}else newQ(false);
 };
-async function newQ(weak,forceSub){
-  if(!sample){offlineQ(forceSub);return}
-  const dom=$("#dom").value, sub=forceSub||pickSub(dom,false);
-  const box=$("#qbox");box.innerHTML="";
-  const card=document.createElement("div");card.className="card";card.textContent="Writing a question…";box.appendChild(card);
-  $("#gen").disabled=true;
-  const prompt=`${QUIZ}\n\nExam domain: ${D[dom].name}\nSubtopic: ${sub}\nDifficulty: ${$("#lvl").value}\nAvoid repeating these recent questions: ${JSON.stringify(recent.slice(-6))}`;
-  try{
-    const r=await sample.json(prompt,{cache:false});
-    if(!r||!Array.isArray(r.options)||r.options.length!==4||!Number.isInteger(r.answer))throw {code:"bad_format"};
-    recent.push(String(r.question).slice(0,80));
-    show(card,r,dom,sub);
-  }catch(e){card.textContent="Couldn’t generate a question ("+(e&&e.code||"error")+"). Tap “New question” to retry.";card.classList.add("err")}
-  $("#gen").disabled=false;
-}
+function newQ(weak,forceSub){offlineQ(forceSub)}
 function show(card,r,dom,sub){
   card.textContent="";
   const m=document.createElement("div");m.className="muted";m.textContent=D[dom].name+" · "+sub;card.appendChild(m);

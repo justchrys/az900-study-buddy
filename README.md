@@ -1,95 +1,65 @@
 # AZ-900 Study Buddy (Unofficial)
 
-> An AI study companion for Microsoft Azure Fundamentals (AZ-900) that explains cloud concepts with African examples and in local languages, writes original practice questions with explanations for every answer, and tracks your readiness by topic.
+> A free, no-login study companion for Microsoft Azure Fundamentals (AZ-900): plain-language explanations with everyday local analogies, original practice questions that explain every answer, and a readiness tracker by exam domain.
 
-**Unofficial.** This project is not affiliated with, endorsed by, or sponsored by Microsoft. It uses no Microsoft logos and no real exam questions. All content is AI-generated from the public [AZ-900 skills outline](https://learn.microsoft.com/credentials/certifications/resources/study-guides/az-900) and should be verified on Microsoft Learn.
+**Unofficial.** This project is not affiliated with, endorsed by, or sponsored by Microsoft. It uses no Microsoft logos and no real exam questions. Content follows the public [AZ-900 skills outline](https://learn.microsoft.com/credentials/certifications/resources/study-guides/az-900) and should always be verified on Microsoft Learn.
 
-Built for the **#1MillionDevs AZ-900 Vibe Coding Hackathon** (20 to 23 October 2026) by [YOUR NAME], solo.
+Built for the **#1MillionDevs AZ-900 Vibe Coding Hackathon** (20 to 23 October 2026) by Chrystabel Young, solo.
 
-**Live demo:** [PASTE CLAUDE.AI ARTIFACT LINK] (open while signed in to claude.ai; the AI features ask for permission on first use)
+**Live demo:** https://justchrys.github.io/az900-study-buddy/
 
-![screenshot placeholder](docs/screenshot-buddy.png)
+![Study Buddy](docs/screenshot-buddy.png)
 
 ## The problem
 
-[YOUR STORY, 2 to 3 sentences from your own AZ-900 prep. Example angles: concepts like elasticity vs scalability felt abstract; practice questions told me I was wrong but not why; examples were always US or European; I never knew if I was ready.]
+I kept failing the same elasticity vs. scalability questions because every definition sounded identical: “the ability to handle changing demand.” What fixed it was a boda boda rider in Nairobi. Scalability is buying a second bike because your regular customers doubled over the year. Elasticity is calling in three riders for one chaotic Friday when a nearby office empties out at 5pm. The other thing that nearly broke me was practice tests that said “Incorrect” with no explanation. I started writing one sentence on why I chose each wrong answer, and those notes did more for me than the tests themselves. This app is the tool I wished I’d had.
 
 ## What it does
 
-This tool combines three of the hackathon tracks in one app.
-
-| Tab | Track | What it does |
+| Tab | Hackathon track | What it does |
 |---|---|---|
-| Study Buddy | AI Study Buddy | Explains any AZ-900 concept in plain words, with an example from the learner’s chosen African context, in English, Swahili, Hausa, Yoruba, Zulu, French or Sheng, plus an exam tip. |
-| Quiz | Smart Quiz Builder | Generates original questions by exam domain and subtopic. Every answer gets an explanation, and wrong answers get a note on the specific misconception. |
-| Readiness | Readiness Tracker | Scores by domain, an overall estimate weighted by the exam’s domain weights, and the five weakest subtopics. “Target my weakest area” sends you back to them. |
+| Study Buddy | Study Buddy | 16 short concept explanations, each with a plain-language definition, an everyday local analogy and an exam tip. Tap a topic or type a keyword. |
+| Quiz | Smart Quiz Builder | 22 original questions across the three exam domains. Answer order is shuffled every time. Every answer gets an explanation, and wrong answers get a note on the specific misconception. |
+| Readiness | Readiness Tracker | Accuracy per domain, an overall estimate weighted by the exam’s domain weights, and your five weakest subtopics. “Target my weakest area” sends you back to them. |
 
-## Prompt engineering
+## Design decisions
 
-The prompts are the core of the product. Design choices:
+- **Misconception-first feedback.** Every distractor has its own explanation of why it is wrong. This is the habit that worked for me when I studied.
+- **Analogies that stick.** Concepts that sound alike (scalability vs elasticity, Policy vs locks, VPN vs ExpressRoute) are explained with side-by-side everyday examples.
+- **Honest readiness.** The overall estimate is only meant as a guide once you have answered at least 5 questions in every domain. It is a study aid, not a prediction of your exam result.
+- **No accounts, no servers, no AI at runtime.** It runs entirely in the browser and works offline. Progress is saved in `localStorage`.
 
-1. **Role and audience fixed up front.** A beginner preparing for AZ-900, so explanations stay simple.
-2. **Rigid structure.** Plain explanation, then one local analogy, then one exam tip, under 180 words. This keeps answers scannable and consistent.
-3. **Honesty over fluency.** The model is told to say when it is unsure and point to Microsoft Learn rather than guess.
-4. **Anti-copying guardrail.** Questions must be original and based only on the public skills outline.
-5. **Machine-readable output.** The quiz prompt demands a strict JSON object (`question`, `options`, `answer`, `why`, `whyNot`, `tip`) so the UI can render feedback per option. Output is validated before display (exactly 4 options, integer answer index).
-6. **Misconception-based feedback.** `whyNot` asks for the specific misconception behind each distractor, which is what turns a quiz into learning.
-7. **Variety control.** The last six question stems are passed back in so questions do not repeat; the subtopic is chosen from the skills outline in code, not left to the model.
-8. **Memoryless calls.** Each call carries its full instructions and context.
+## How the content was made
 
-### Study Buddy prompt
+The content was drafted with AI assistance (Claude) from the public skills outline and then checked against Microsoft Learn. Questions are original and are not copied from any exam or practice test.I reviewed every question against the Microsoft Learn pages for its subtopic.
 
-```
-You are "Study Buddy", a friendly tutor helping a beginner prepare for Microsoft Azure Fundamentals (AZ-900), based on the public AZ-900 skills outline.
-Rules:
-- Explain the concept in plain words first (2-4 sentences), then give ONE real-life analogy or example set in the learner's chosen African context, then a one-line "Exam tip" on how this is usually tested or confused with a similar concept.
-- Be accurate about Azure. If you are unsure of a detail, say so and point to Microsoft Learn rather than guessing.
-- Keep the answer under 180 words. No headings, no markdown symbols.
-- Write in the requested language. Keep Azure service names in English.
-- Never reproduce real exam questions.
-```
+## Readiness calculation
 
-### Quiz prompt
-
-```
-You write ORIGINAL practice questions for Microsoft Azure Fundamentals (AZ-900), based only on the public AZ-900 skills outline. Never copy or closely imitate real exam questions.
-Return ONLY a JSON object, no markdown, with these keys:
-"question", "options" (exactly 4), "answer" (0-3), "why", "whyNot" (one per option), "tip".
-Be technically accurate. If a fact is uncertain, choose a different question.
-```
-
-## How readiness is calculated
-
-Accuracy per domain, weighted by approximate exam weights (Cloud Concepts 27.5%, Architecture and Services 37.5%, Management and Governance 35%, midpoints of the published ranges). The estimate is only shown as reliable after 5 or more answers per domain. It is a study guide, not a prediction of your exam result.
+Accuracy per domain, weighted by approximate exam weights (Cloud Concepts 27.5%, Architecture and Services 37.5%, Management and Governance 35%, the midpoints of the published ranges).
 
 ## Tech
 
-- Single-file HTML, CSS and JavaScript, no build step
-- AI via Claude (Anthropic) through the claude.ai artifact runtime
-- Progress stored in the browser’s `localStorage`, so there is no account and no server
-- Built with Claude.ai as the AI pair-programmer
+- Single-file HTML, CSS and JavaScript (`index.html`), no build step and no dependencies
+- Hosted on GitHub Pages
+- Built with AI-assisted tools (Claude.ai) and VS Code
 
 ## Run it
 
-**Live AI version:** open the demo link above in claude.ai. Study Buddy answers and quiz questions are generated fresh each time.
+Open the live demo link, or download `index.html` and open it in a browser.
 
-**Anywhere else (GitHub Pages, opening `index.html` locally):** the app detects that live AI is unavailable and switches to a built-in mode with 13 hand-written, original practice questions (with per-option explanations) and 6 pre-written Study Buddy explanations. Readiness tracking works the same in both modes. Language and country choices need the live AI version.
+## Limitations
 
-To add your own AI backend, replace the `claude.use("sample")` calls in `index.html` with calls to your own LLM endpoint.
-
-## Limitations (honest list)
-
-- AI-generated questions can contain mistakes. Always check against Microsoft Learn.
-- Outside claude.ai the app runs in a limited built-in mode (13 questions, 6 explanations, English only).
-- Language quality varies by language, and Swahili, Hausa, Yoruba and Zulu outputs deserve review by a native speaker.
-- Progress lives in one browser and is not synced across devices.
+- A small content set (22 questions, 16 explanations), English only. It is not a full practice exam.
+- AI-assisted content can contain mistakes. Check against Microsoft Learn.
+- Progress lives in one browser and does not sync between devices.
 
 ## Roadmap
 
-- Spaced-repetition flashcards from missed questions
+- More questions per subtopic, including the Azure IoT, AI and serverless categories
+- Flashcards from missed questions and a mistake-notes box (“why did I pick this?”)
 - Study planner from exam date and weak areas
+- Local-language versions, reviewed by native speakers
 - Other certifications (AZ-104, AI-900, AWS Cloud Practitioner)
-- Community-reviewed local-language glossary
 
 ## Repo layout
 
