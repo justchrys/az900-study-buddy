@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AZ-900 Study Buddy (Unofficial)</title>
+<style>
+:root{--bg:#f7f6f2;--fg:#1d1d1b;--muted:#6b6a64;--card:#fff;--line:#e2e0d8;--accent:#0b6e4f;--accent-fg:#fff;--good:#0b6e4f;--bad:#b3261e;--goodbg:#e3f3ec;--badbg:#fbe9e7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--fg:#efeee9;--muted:#9c9a92;--card:#1f1f1d;--line:#34332f;--accent:#4cc79a;--accent-fg:#0c1f17;--good:#4cc79a;--bad:#ff8a80;--goodbg:#14322a;--badbg:#3a1f1c}}
+:root[data-theme="dark"]{--bg:#141413;--fg:#efeee9;--muted:#9c9a92;--card:#1f1f1d;--line:#34332f;--accent:#4cc79a;--accent-fg:#0c1f17;--good:#4cc79a;--bad:#ff8a80;--goodbg:#14322a;--badbg:#3a1f1c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.4rem;margin:0}
+.sub{color:var(--muted);font-size:.85rem;margin:2px 0 16px}
+nav{display:flex;gap:6px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+nav button{flex:1;background:none;border:0;border-bottom:3px solid transparent;padding:10px 4px;font:inherit;color:var(--muted);cursor:pointer}
+nav button.on{color:var(--fg);border-bottom-color:var(--accent);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+label{font-size:.85rem;color:var(--muted);display:block;margin:0 0 4px}
+select,input,textarea{width:100%;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.row>*{flex:1;min-width:150px}
+button.pri{background:var(--accent);color:var(--accent-fg);border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}
+button.pri:disabled{opacity:.5;cursor:wait}
+button.ghost{background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--fg);border-radius:99px;padding:4px 12px;font-size:.85rem;cursor:pointer}
+.msg{white-space:pre-wrap;margin:0 0 12px}
+.msg.me{color:var(--muted);font-size:.9rem}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0;font:inherit;cursor:pointer}
+.opt.good{border-color:var(--good);background:var(--goodbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.fb{margin-top:12px;padding:12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);white-space:pre-wrap}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--accent)}
+.big{font-size:2.4rem;font-weight:700;line-height:1}
+.muted{color:var(--muted);font-size:.85rem}
+.err{color:var(--bad)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>AZ-900 Study Buddy</h1>
+<p class="sub">Unofficial study aid. Not affiliated with or endorsed by Microsoft. All content is AI-generated; verify on Microsoft Learn.</p>
+<nav id="nav"><button data-t="buddy" class="on">Study Buddy</button><button data-t="quiz">Quiz</button><button data-t="progress">Readiness</button></nav>
+
+<section id="buddy">
+  <div class="card">
+    <div class="row">
+      <div><label for="lang">Explain in</label>
+        <select id="lang"><option>English</option><option>Swahili</option><option>Simple English with Sheng</option><option>French</option><option>Hausa</option><option>Yoruba</option><option>Zulu</option></select></div>
+      <div><label for="ctx">African example from</label>
+        <select id="ctx"><option>Any African context</option><option>Kenya (M-Pesa, matatus)</option><option>Nigeria (fintech, Lagos markets)</option><option>Ghana (mobile money, cocoa)</option><option>South Africa (load-shedding, retail)</option><option>Rwanda / Ethiopia (agri-tech)</option></select></div>
+    </div>
+    <label for="q">Ask about any AZ-900 concept</label>
+    <textarea id="q" rows="2" placeholder="e.g. What is the difference between scalability and elasticity?"></textarea>
+    <div class="chips" id="chips"></div>
+    <button class="pri" id="ask">Explain it</button>
+  </div>
+  <div id="chat"></div>
+</section>
+
+<section id="quiz" hidden>
+  <div class="card">
+    <div class="row">
+      <div><label for="dom">Topic</label><select id="dom"></select></div>
+      <div><label for="lvl">Difficulty</label><select id="lvl"><option>Beginner</option><option selected>Exam level</option><option>Tricky</option></select></div>
+    </div>
+    <div class="row"><button class="pri" id="gen">New question</button><button class="ghost" id="weak">Target my weakest area</button></div>
+    <p class="muted" id="qstat"></p>
+  </div>
+  <div id="qbox"></div>
+</section>
+
+<section id="progress" hidden>
+  <div class="card">
+    <div class="muted">Estimated readiness</div>
+    <div class="big" id="ready">–</div>
+    <p class="muted" id="readynote"></p>
+  </div>
+  <div class="card" id="bars"></div>
+  <div class="card"><div class="muted" style="margin-bottom:6px">Weakest subtopics</div><div id="weaklist"></div></div>
+  <button class="ghost" id="reset">Reset my progress</button>
+</section>
+</main>
+
+<script>
+const D={
+  cloud:{name:"Describe cloud concepts",w:.275,subs:["Cloud computing benefits (high availability, scalability, elasticity, agility)","Shared responsibility model","CapEx vs OpEx and consumption-based pricing","IaaS, PaaS and SaaS","Public, private and hybrid cloud","Reliability, predictability, security and governance in the cloud"]},
+  arch:{name:"Describe Azure architecture and services",w:.375,subs:["Regions, region pairs and availability zones","Resource groups and subscriptions","Virtual machines, scale sets and availability sets","Containers, App Service and Azure Functions","Virtual networks, VPN Gateway and ExpressRoute","Storage accounts, redundancy and tiers","Microsoft Entra ID, SSO, MFA and Conditional Access","Zero Trust and defence in depth","Azure IoT, AI and serverless service categories"]},
+  mgmt:{name:"Describe Azure management and governance",w:.35,subs:["Cost factors and the pricing calculator / TCO calculator","Microsoft Cost Management and tags","Azure Policy and resource locks","Microsoft Purview and compliance","Azure portal, Cloud Shell, CLI and PowerShell","Azure Resource Manager, ARM templates and Bicep","Azure Arc and infrastructure as code","Azure Advisor, Service Health and Azure Monitor"]}
+};
+const $=s=>document.querySelector(s);
+const KEY="az900-unofficial-stats-v1";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+function save(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+let stats=load(), sample=null, recent=[];
+
+// ---- offline fallback (used when live AI is unavailable, e.g. on GitHub Pages)
+const BUD=[
+{k:/elastic|scalab/i,t:"Scalability is growing capacity to meet long-term growth. Elasticity is automatically adding and removing resources as demand rises and falls.\n\nExample: buying a second boda boda because your regular customers doubled over the year is scalability. Calling in three extra riders for one chaotic Friday at 5pm, then sending them home, is elasticity.\n\nExam tip: if the question mentions automatically shrinking back after a spike, the answer is elasticity."},
+{k:/zone|availab/i,t:"An availability zone is one or more separate datacenters inside an Azure region, each with its own power, cooling and networking.\n\nExample: think of three markets in one city on different power lines. If one has a blackout, the others keep trading.\n\nExam tip: zones protect against a datacenter failure inside a region. Region pairs are about disasters that hit a whole region."},
+{k:/shared|responsib/i,t:"In the shared responsibility model, Microsoft secures the physical datacenter and you stay responsible for your data, accounts and devices. Everything in between shifts depending on IaaS, PaaS or SaaS.\n\nExample: a landlord looks after the building, but you still lock your own door and decide who gets a key.\n\nExam tip: your data and identities are your responsibility in every model."},
+{k:/iaas|paas|saas/i,t:"IaaS gives you raw infrastructure (virtual machines) to manage yourself. PaaS gives you a platform where you only manage your app and data. SaaS is finished software you simply use.\n\nExample: IaaS is renting an empty plot and building a shop. PaaS is renting a furnished shop and bringing your stock. SaaS is buying lunch at a restaurant.\n\nExam tip: more control means IaaS, less management means SaaS."},
+{k:/policy/i,t:"Azure Policy checks that your resources follow your rules, for example only allowing certain regions or requiring tags. It can also flag or block non-compliant resources.\n\nExample: a company rule that every shop must display a licence. Policy is the inspector checking each one.\n\nExam tip: Policy is about rules on resources, role-based access control is about who can act, and locks stop deletion or changes."},
+{k:/capex|opex|expend/i,t:"CapEx is paying a large amount upfront for assets. OpEx is paying as you go for what you use. Cloud is mostly OpEx with consumption-based pricing.\n\nExample: buying your own motorbike is CapEx. Paying a boda boda per trip is OpEx.\n\nExam tip: pay-as-you-go and no upfront hardware means OpEx."}
+];
+const BANK=[
+{d:"cloud",i:0,question:"A retailer’s site gets ten times its normal traffic for one day and then returns to normal. Which capability lets resources grow for the spike and shrink afterward automatically?",options:["Elasticity","High availability","Disaster recovery","Fault tolerance"],answer:0,why:"Elasticity is automatically adding and removing resources to match demand, including shrinking when the spike ends.",whyNot:["Correct.","High availability is about keeping a service running with minimal downtime, not matching demand.","Disaster recovery is about recovering after a major failure.","Fault tolerance is about continuing to work when a component fails."],tip:"Spike up, then back down by itself: elasticity."},
+{d:"cloud",i:1,question:"When a company uses a SaaS product such as an online email service, which item always remains the customer’s responsibility?",options:["Physical datacenter security","Operating system patching","The information and data, and who has access to it","Network cabling"],answer:2,why:"In every cloud service model the customer remains responsible for their data, accounts and access.",whyNot:["The provider secures the physical datacenter in every model.","In SaaS the provider manages the operating system.","Correct.","Cabling is part of the provider’s physical infrastructure."],tip:"Data and identities are always yours."},
+{d:"cloud",i:2,question:"A startup avoids buying servers and pays only for the compute hours it uses each month. Which describes this approach?",options:["Capital expenditure (CapEx)","Operational expenditure (OpEx) with consumption-based pricing","A perpetual software licence","A private cloud"],answer:1,why:"Paying for what you use as you go is operational expenditure, which is how consumption-based cloud pricing works.",whyNot:["CapEx means a large upfront purchase of assets such as servers.","Correct.","A perpetual licence is a one-time purchase, the opposite of pay-as-you-go.","A private cloud is a deployment model and says nothing about how you pay."],tip:"Pay as you go means OpEx."},
+{d:"cloud",i:3,question:"A team has written its own web app and wants to deploy it without managing the operating system or servers. Which service model fits best?",options:["IaaS","PaaS","SaaS","Private cloud"],answer:1,why:"With PaaS the provider manages the operating system and infrastructure while you manage your application and data.",whyNot:["With IaaS you still manage the operating system.","Correct.","SaaS is finished software you use, not a place to deploy your own code.","A private cloud is a deployment model, not a service model."],tip:"Your own code, no server management: PaaS."},
+{d:"arch",i:0,question:"You want a VM-based workload to survive the failure of a single datacenter inside one Azure region. What should you use?",options:["Availability Zones","Resource groups","Management groups","Azure Policy"],answer:0,why:"Availability Zones are physically separate locations inside a region with independent power, cooling and networking.",whyNot:["Correct.","Resource groups organise resources and add no resilience.","Management groups organise subscriptions and add no resilience.","Policy enforces rules and does not protect against failures."],tip:"Zones guard against datacenter failure, region pairs against regional disaster."},
+{d:"arch",i:1,question:"Which statement about Azure resource groups is true?",options:["Every resource belongs to exactly one resource group","A resource can belong to several resource groups at once","A resource group cannot be deleted once created","Resource groups are billed separately from their resources"],answer:0,why:"Each resource lives in exactly one resource group, and deleting the group deletes the resources inside it.",whyNot:["Correct.","A resource has one resource group at a time, though it can be moved.","Resource groups can be deleted, which also deletes their resources.","You pay for the resources, not for the group itself."],tip:"One resource, one group."},
+{d:"arch",i:3,question:"You need code that runs only when an event triggers it and is billed per execution. Which Azure service fits best?",options:["Azure Functions","Azure Virtual Machines","Azure Virtual Network","Azure Bastion"],answer:0,why:"Azure Functions is serverless: your code runs on a trigger and you pay for execution rather than for idle servers.",whyNot:["Correct.","VMs run and bill continuously and you manage them.","A virtual network provides connectivity, not code execution.","Bastion gives secure remote access to VMs, not event-driven code."],tip:"Event trigger plus pay per run: Functions."},
+{d:"arch",i:5,question:"You need to store large amounts of unstructured data such as images and videos. Which Azure storage service fits best?",options:["Azure Blob Storage","Azure Files","Azure Queue Storage","Azure Table Storage"],answer:0,why:"Blob Storage is built for large amounts of unstructured data such as images, video and backups.",whyNot:["Correct.","Azure Files provides managed file shares, mainly for shared file access.","Queue Storage passes messages between components.","Table Storage holds structured NoSQL key-value data."],tip:"Unstructured at scale: Blob."},
+{d:"arch",i:6,question:"A user signs in once and can then reach several applications without signing in again. Which capability provides this?",options:["Single sign-on (SSO)","Multifactor authentication","Conditional Access","Role-based access control"],answer:0,why:"Single sign-on lets one sign-in grant access to multiple applications.",whyNot:["Correct.","MFA requires extra proof of identity at sign-in; it is not about signing in once.","Conditional Access decides whether to allow, block or challenge sign-ins based on conditions.","Role-based access control manages what an identity can do with Azure resources."],tip:"Sign in once, reach many apps: SSO."},
+{d:"mgmt",i:0,question:"Which tool estimates the monthly cost of Azure services you plan to deploy?",options:["Pricing calculator","TCO calculator","Azure Advisor","Azure Service Health"],answer:0,why:"The pricing calculator estimates the cost of the specific Azure services and configurations you choose.",whyNot:["Correct.","The TCO calculator compares running on-premises with running in Azure.","Advisor gives optimisation recommendations for resources you already run.","Service Health reports on Azure service issues that affect you."],tip:"Pricing = what will Azure cost; TCO = Azure versus on-premises."},
+{d:"mgmt",i:1,question:"Which feature lets you label resources by department so you can later view costs per department?",options:["Tags","Resource locks","Azure Policy","Availability sets"],answer:0,why:"Tags are name-value labels on resources that you can use to group and filter costs.",whyNot:["Correct.","Locks stop deletion or changes and do not label resources.","Policy enforces rules, though it can require tags to exist.","Availability sets spread VMs across hardware for resilience."],tip:"Label it with a tag to report on it."},
+{d:"mgmt",i:2,question:"You want to prevent anyone, even an owner, from accidentally deleting a production database. What should you apply?",options:["A resource lock","An Azure Policy","A tag","A budget alert"],answer:0,why:"A resource lock set to prevent deletion blocks deletes regardless of the user’s permissions until the lock is removed.",whyNot:["Correct.","Policy enforces rules on how resources are configured and does not block a delete in this way.","Tags are labels and protect nothing.","A budget alert notifies you about spending, not deletions."],tip:"Stop accidental delete: lock."},
+{d:"mgmt",i:7,question:"Which service gives personalised recommendations to improve the reliability, security, performance and cost of your Azure resources?",options:["Azure Advisor","Azure Service Health","Azure Monitor","Azure Arc"],answer:0,why:"Azure Advisor analyses your resources and recommends improvements across several areas, including cost, security and reliability.",whyNot:["Correct.","Service Health tells you about Azure service incidents and planned maintenance.","Monitor collects and analyses telemetry and does not give optimisation advice.","Arc extends Azure management to resources outside Azure."],tip:"Advisor = advice."}
+];
+function offlineAsk(q){
+  const me=document.createElement("p");me.className="msg me";me.textContent="You: "+q;
+  const out=document.createElement("p");out.className="msg";
+  const hit=BUD.find(b=>b.k.test(q));
+  out.textContent=hit?hit.t+"\n\n(Built-in answer. Language and country choices need live AI.)":"Live AI isn’t available here, so I can only answer the built-in topics: scalability vs elasticity, availability zones, shared responsibility, IaaS/PaaS/SaaS, Azure Policy, and CapEx vs OpEx.";
+  $("#chat").prepend(out);$("#chat").prepend(me);
+}
+function offlineQ(forceSub){
+  const dom=$("#dom").value;
+  let pool=BANK.filter(b=>b.d===dom);
+  if(forceSub){const m=pool.filter(b=>D[b.d].subs[b.i]===forceSub);if(m.length)pool=m}
+  const fresh=pool.filter(b=>!recent.includes(b.question.slice(0,80)));
+  const src=fresh.length?fresh:pool;
+  const r=src[Math.floor(Math.random()*src.length)];
+  recent.push(r.question.slice(0,80));
+  const box=$("#qbox");box.innerHTML="";
+  const card=document.createElement("div");card.className="card";box.appendChild(card);
+  show(card,r,r.d,D[r.d].subs[r.i]);
+}
+
+// ---- tabs
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#nav button").forEach(x=>x.classList.toggle("on",x===b));
+  ["buddy","quiz","progress"].forEach(id=>$("#"+id).hidden=id!==b.dataset.t);
+  if(b.dataset.t==="progress")renderProgress();
+});
+
+(async()=>{try{sample=await claude.use("sample")}catch(e){sample=null}
+  if(!sample){const n=document.createElement("p");n.className="muted err";n.textContent="Live AI isn’t available here, so the app is using its built-in practice questions and answers. Open the claude.ai version for unlimited AI-generated content.";document.querySelector("main").insertBefore(n,$("#nav"))}
+})();
+
+// ---- Study Buddy
+const BUDDY=`You are "Study Buddy", a friendly tutor helping a beginner prepare for Microsoft Azure Fundamentals (AZ-900), based on the public AZ-900 skills outline.
+Rules:
+- Explain the concept in plain words first (2-4 sentences), then give ONE real-life analogy or example set in the learner's chosen African context, then a one-line "Exam tip" on how this is usually tested or confused with a similar concept.
+- Be accurate about Azure. If you are unsure of a detail, say so and point to Microsoft Learn rather than guessing.
+- Keep the answer under 180 words. No headings, no markdown symbols.
+- Write in the requested language. Keep Azure service names in English.
+- Never reproduce real exam questions.`;
+const chips=["Scalability vs elasticity","What is an availability zone?","Shared responsibility model","IaaS vs PaaS vs SaaS","What does Azure Policy do?","CapEx vs OpEx"];
+chips.forEach(t=>{const c=document.createElement("button");c.className="chip";c.textContent=t;c.onclick=()=>{$("#q").value=t;ask()};$("#chips").appendChild(c)});
+$("#ask").onclick=ask;
+async function ask(){
+  const q=$("#q").value.trim(); if(!q)return;
+  if(!sample){offlineAsk(q);return}
+  const btn=$("#ask");btn.disabled=true;
+  const me=document.createElement("p");me.className="msg me";me.textContent="You: "+q;
+  const out=document.createElement("p");out.className="msg";out.textContent="Thinking…";
+  $("#chat").prepend(out);$("#chat").prepend(me);
+  const prompt=`${BUDDY}\n\nLanguage: ${$("#lang").value}\nContext for the example: ${$("#ctx").value}\n\nLearner question: ${q}`;
+  try{await sample(prompt,{cache:false,onText:({text})=>{out.textContent=text}})}
+  catch(e){out.textContent="Sorry, that didn’t work ("+(e&&e.code||"error")+"). Please try again.";out.classList.add("err")}
+  btn.disabled=false;
+}
+
+// ---- Quiz
+Object.entries(D).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.name;$("#dom").appendChild(o)});
+const QUIZ=`You write ORIGINAL practice questions for Microsoft Azure Fundamentals (AZ-900), based only on the public AZ-900 skills outline. Never copy or closely imitate real exam questions.
+Return ONLY a JSON object, no markdown, with these keys:
+"question": string (a short scenario or direct question),
+"options": array of exactly 4 strings (plausible distractors, similar length, no "all of the above"),
+"answer": integer 0-3 index of the single correct option,
+"why": string explaining in 1-3 sentences why the correct option is right,
+"whyNot": array of 4 strings, one per option in order; for the correct option write "Correct."; for the others explain the specific misconception that makes it wrong,
+"tip": string, one-line memory aid.
+Be technically accurate. If a fact is uncertain, choose a different question.`;
+function pickSub(dom,weak){
+  const subs=D[dom].subs;
+  if(weak){const t=subs.filter(s=>stats[s]).sort((a,b)=>acc(a)-acc(b));if(t.length&&acc(t[0])<.8)return t[0]}
+  return subs[Math.floor(Math.random()*subs.length)];
+}
+const acc=s=>stats[s]?stats[s].c/stats[s].a:0;
+$("#gen").onclick=()=>newQ(false);
+$("#weak").onclick=()=>{
+  let best=null,bs=2;
+  Object.entries(D).forEach(([k,v])=>v.subs.forEach(s=>{if(stats[s]&&acc(s)<bs){bs=acc(s);best=[k,s]}}));
+  if(best){$("#dom").value=best[0];newQ(true,best[1])}else newQ(false);
+};
+async function newQ(weak,forceSub){
+  if(!sample){offlineQ(forceSub);return}
+  const dom=$("#dom").value, sub=forceSub||pickSub(dom,false);
+  const box=$("#qbox");box.innerHTML="";
+  const card=document.createElement("div");card.className="card";card.textContent="Writing a question…";box.appendChild(card);
+  $("#gen").disabled=true;
+  const prompt=`${QUIZ}\n\nExam domain: ${D[dom].name}\nSubtopic: ${sub}\nDifficulty: ${$("#lvl").value}\nAvoid repeating these recent questions: ${JSON.stringify(recent.slice(-6))}`;
+  try{
+    const r=await sample.json(prompt,{cache:false});
+    if(!r||!Array.isArray(r.options)||r.options.length!==4||!Number.isInteger(r.answer))throw {code:"bad_format"};
+    recent.push(String(r.question).slice(0,80));
+    show(card,r,dom,sub);
+  }catch(e){card.textContent="Couldn’t generate a question ("+(e&&e.code||"error")+"). Tap “New question” to retry.";card.classList.add("err")}
+  $("#gen").disabled=false;
+}
+function show(card,r,dom,sub){
+  card.textContent="";
+  const m=document.createElement("div");m.className="muted";m.textContent=D[dom].name+" · "+sub;card.appendChild(m);
+  const q=document.createElement("p");q.style.fontWeight="600";q.textContent=r.question;card.appendChild(q);
+  let done=false;
+  r.options.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=String.fromCharCode(65+i)+". "+t;
+    b.onclick=()=>{
+      if(done)return;done=true;
+      const ok=i===r.answer;
+      const s=stats[sub]||(stats[sub]={d:dom,a:0,c:0});s.a++;if(ok)s.c++;save(stats);
+      [...card.querySelectorAll(".opt")].forEach((x,j)=>{if(j===r.answer)x.classList.add("good");else if(j===i)x.classList.add("bad")});
+      const fb=document.createElement("div");fb.className="fb";
+      const why=Array.isArray(r.whyNot)&&r.whyNot[i]&&!ok?"\n\nYour choice: "+r.whyNot[i]:"";
+      fb.textContent=(ok?"Correct! ":"Not quite. The answer is "+String.fromCharCode(65+r.answer)+". ")+r.why+why+(r.tip?"\n\nMemory aid: "+r.tip:"");
+      card.appendChild(fb);
+      const n=document.createElement("button");n.className="pri";n.style.marginTop="12px";n.textContent="Next question";n.onclick=()=>newQ(false);card.appendChild(n);
+      stat();
+    };
+    card.appendChild(b);
+  });
+}
+function stat(){let a=0,c=0;Object.values(stats).forEach(s=>{a+=s.a;c+=s.c});$("#qstat").textContent=a?`Answered ${a} · ${Math.round(c/a*100)}% correct overall`:"Pick a topic and start practising."}
+stat();
+
+// ---- Readiness
+function dstat(k){let a=0,c=0;Object.values(stats).forEach(s=>{if(s.d===k){a+=s.a;c+=s.c}});return{a,c}}
+function renderProgress(){
+  const bars=$("#bars");bars.innerHTML="";
+  let tot=0,wsum=0,enough=true;
+  Object.entries(D).forEach(([k,v])=>{
+    const {a,c}=dstat(k),p=a?c/a:0;
+    if(a<5)enough=false;
+    tot+=p*v.w;wsum+=v.w;
+    const w=document.createElement("div");w.style.marginBottom="12px";
+    const t=document.createElement("div");t.textContent=v.name;
+    const m=document.createElement("div");m.className="muted";m.textContent=a?`${c}/${a} correct · ${Math.round(p*100)}% · exam weight about ${Math.round(v.w*100)}%`:"No questions yet";
+    const bar=document.createElement("div");bar.className="bar";const i=document.createElement("i");i.style.width=Math.round(p*100)+"%";bar.appendChild(i);
+    w.append(t,bar,m);bars.appendChild(w);
+  });
+  const pct=Math.round(tot/wsum*100);
+  const any=Object.keys(stats).length>0;
+  $("#ready").textContent=any?pct+"%":"–";
+  $("#readynote").textContent=!any?"Answer some quiz questions to see your estimate.":!enough?"Answer at least 5 questions in every topic for a reliable estimate.":pct>=80?"Looking strong. Keep practising the weak spots below, then consider booking the exam.":pct>=60?"Getting there. Focus on your weakest subtopics.":"Keep studying. Use the Study Buddy on the topics you miss.";
+  const wl=$("#weaklist");wl.innerHTML="";
+  const arr=Object.entries(stats).filter(([,s])=>s.a>0).sort((x,y)=>x[1].c/x[1].a-y[1].c/y[1].a).slice(0,5);
+  if(!arr.length){wl.textContent="Nothing yet.";wl.className="muted"}
+  arr.forEach(([n,s])=>{const p=document.createElement("div");p.style.margin="6px 0";p.textContent=`${Math.round(s.c/s.a*100)}% (${s.c}/${s.a}) · ${n}`;wl.appendChild(p)});
+}
+$("#reset").onclick=()=>{if(confirm("Clear all saved progress?")){stats={};recent=[];save(stats);renderProgress();stat()}};
+</script>
+</body>
+</html>
